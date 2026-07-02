@@ -1,26 +1,115 @@
 @import "tailwindcss";
 
+/* ===== Byte-Sized Python design tokens (imported from the Claude Design project) ===== */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --bsp-blue: #3776ab;
+  --bsp-blue-deep: #2563eb;
+  --bsp-yellow: #fed33b;
+  --bsp-yellow-2: #ffd43b;
+  --bsp-coral: #f75d5d;
+  --bsp-ink: #1e293b;
+  --bsp-white: #ffffff;
+
+  --slate-50: #f8fafc;
+  --slate-100: #f1f5f9;
+  --slate-200: #e2e8f0;
+  --slate-300: #cbd5e1;
+  --slate-400: #94a3b8;
+  --slate-500: #64748b;
+  --slate-600: #475569;
+  --slate-700: #334155;
+  --slate-800: #1e293b;
+  --slate-900: #0f172a;
+
+  --bsp-blue-50: rgba(55, 118, 171, 0.06);
+  --bsp-blue-100: rgba(55, 118, 171, 0.1);
+  --bsp-blue-200: rgba(55, 118, 171, 0.2);
+  --bsp-yellow-20: rgba(254, 211, 59, 0.2);
+  --bsp-yellow-30: rgba(254, 211, 59, 0.3);
+
+  --success: #16a34a;
+  --warning: #f59e0b;
+  --danger: #ef4444;
+
+  --shadow-sm: 0 1px 2px rgba(30, 41, 59, 0.06);
+  --shadow-card: 0 10px 30px -10px rgba(30, 41, 59, 0.1);
+  --shadow-hero: 0 30px 60px -20px rgba(55, 118, 171, 0.25);
+
+  --gradient-site: linear-gradient(
+    180deg,
+    #ffffff 0%,
+    rgba(55, 118, 171, 0.06) 25%,
+    rgba(254, 211, 59, 0.08) 50%,
+    rgba(55, 118, 171, 0.06) 75%,
+    #ffffff 100%
+  );
+
+  --ease-smooth: cubic-bezier(0.4, 0, 0.2, 1);
+
+  --weight-bold: 700;
+  --font-heading: var(--font-dm-sans), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-body: var(--font-dm-sans), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-mono: var(--font-fira-code), ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+* {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+  font-family: var(--font-body);
+  color: var(--bsp-ink);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@keyframes hs-pulse {
+  0%,
+  100% {
+    opacity: 0.25;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.7;
+    transform: scale(1.35);
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+.hover-lift {
+  transition:
+    box-shadow 0.25s var(--ease-smooth),
+    transform 0.25s var(--ease-smooth);
+}
+.hover-lift:hover {
+  box-shadow: var(--shadow-hero);
+  transform: translateY(-2px);
+}
+
+/* Responsive utilities */
+@media (max-width: 768px) {
+  .mobile-stack {
+    flex-direction: column !important;
+  }
+  .mobile-gap-4 {
+    gap: 16px !important;
+  }
+  .mobile-w-full {
+    width: 100% !important;
+  }
+  .mobile-grid-cols-1 {
+    grid-template-columns: 1fr !important;
+  }
+  .mobile-grid-cols-2 {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+  .mobile-hidden {
+    display: none !important;
+  }
+  .mobile-p-4 {
+    padding: 16px !important;
+  }
+  .mobile-text-sm {
+    font-size: 14px !important;
+  }
+  .mobile-text-xs {
+    font-size: 12px !important;
+  }
 }
