@@ -1,5 +1,5 @@
 // Thin server-only client for the Vercel REST API.
-// Auth: Bearer token from process.env.VERCEL_TOKEN (see .env.local.example).
+// Auth: Bearer token from process.env.ANALYTICS_TOKEN (see .env.local.example).
 
 const API_BASE = "https://api.vercel.com";
 
@@ -12,9 +12,9 @@ export class VercelApiError extends Error {
 }
 
 function authHeaders() {
-  const token = process.env.VERCEL_TOKEN;
+  const token = process.env.ANALYTICS_TOKEN;
   if (!token) {
-    throw new VercelApiError("VERCEL_TOKEN is not set", 401);
+    throw new VercelApiError("ANALYTICS_TOKEN is not set", 401);
   }
   return { Authorization: `Bearer ${token}` };
 }

@@ -24,7 +24,7 @@ export default function SetupNotice({ message }: { message: string }) {
                 fontSize: 12.5,
                 overflowX: "auto",
               }}
-            >{`VERCEL_TOKEN=your_token_here\nVERCEL_TEAM_ID=team_xxx   # optional, only if the projects live under a team`}</pre>
+            >{`ANALYTICS_TOKEN=your_token_here\nVERCEL_TEAM_ID=team_xxx   # optional, only if the projects live under a team`}</pre>
           </li>
           <li>Restart the dev server (or redeploy).</li>
         </ol>
