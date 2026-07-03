@@ -154,7 +154,7 @@ export default function CommandCenter({
             ))}
           </div>
         </div>
-        <div style={{ display: "flex", alignItems: "center", gap: 12, flexShrink: 0 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 12, flexShrink: 0 }} className="header-controls">
           <div style={{ display: "inline-flex", background: "var(--slate-100)", borderRadius: 999, padding: 3, gap: 2 }}>
             {RANGE_OPTIONS.map((opt) => (
               <button
@@ -179,6 +179,7 @@ export default function CommandCenter({
           </div>
           <button
             onClick={() => exportCsv(vm)}
+            className="export-csv-btn"
             style={{
               border: "1px solid var(--slate-200)",
               background: "#fff",
@@ -267,6 +268,28 @@ export default function CommandCenter({
                 </button>
               ))}
             </div>
+            <div style={{ marginTop: "auto", paddingTop: 16, borderTop: "1px solid var(--slate-200)" }}>
+              <button
+                onClick={() => {
+                  exportCsv(vm);
+                  setSidebarOpen(false);
+                }}
+                style={{
+                  width: "100%",
+                  border: "1px solid var(--slate-200)",
+                  background: "#fff",
+                  borderRadius: 10,
+                  padding: "12px 16px",
+                  fontSize: 14,
+                  fontWeight: 600,
+                  fontFamily: "var(--font-body)",
+                  cursor: "pointer",
+                  color: "var(--bsp-ink)",
+                }}
+              >
+                Export CSV
+              </button>
+            </div>
           </div>
         </>
       )}
@@ -274,11 +297,19 @@ export default function CommandCenter({
       <style jsx>{`
         @media (max-width: 768px) {
           div[style*="position: sticky"] {
-            gap: 12px !important;
-            padding: 12px 16px !important;
+            gap: 8px !important;
+            padding: 10px 12px !important;
           }
           div[style*="display: flex"][style*="align-items: center"][style*="gap: 14"] {
             flex-wrap: wrap !important;
+            gap: 8px !important;
+          }
+          div[style*="display: flex"][style*="align-items: center"][style*="gap: 12"][style*="flex-shrink: 0"] {
+            flex-wrap: wrap !important;
+            gap: 6px !important;
+          }
+          .header-controls {
+            gap: 6px !important;
           }
           .analytics-title {
             display: none !important;
@@ -301,12 +332,20 @@ export default function CommandCenter({
             }
           }
           div[style*="display: inline-flex"][style*="background: var(--slate-100)"] {
-            flex: 1 !important;
-            justify-content: center !important;
+            flex: 0 0 auto !important;
+            padding: 2px !important;
           }
           button[style*="padding: \"6px 14px\""] {
-            padding: 6px 10px !important;
-            font-size: 12px !important;
+            padding: 4px 8px !important;
+            font-size: 11px !important;
+          }
+          button[style*="padding: \"9px 16px\""] {
+            padding: 5px 8px !important;
+            font-size: 10px !important;
+            white-space: nowrap !important;
+          }
+          .export-csv-btn {
+            display: none !important;
           }
           .kpi-grid {
             grid-template-columns: repeat(2, 1fr) !important;
