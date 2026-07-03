@@ -21,14 +21,17 @@ export function fmtDur(seconds: number) {
 export function linePath(vals: number[], max: number, W: number, H: number, padTop: number, padBot: number) {
   const n = vals.length;
   if (n < 2 || max <= 0) {
-    return { line: `M 0 ${H - padBot} L ${W} ${H - padBot}`, area: `M 0 ${H} L ${W} ${H} Z` };
+    const y = H - padBot;
+    const points = vals.map((_, i) => ({ x: n > 1 ? (i * W) / (n - 1) : 0, y }));
+    return { line: `M 0 ${y} L ${W} ${y}`, area: `M 0 ${H} L ${W} ${H} Z`, points };
   }
   const stepX = W / (n - 1);
   const usable = H - padTop - padBot;
   const pts = vals.map((v, i) => [+(i * stepX).toFixed(1), +(H - padBot - (v / max) * usable).toFixed(1)]);
   const line = "M " + pts.map((p) => p.join(" ")).join(" L ");
   const area = line + ` L ${W} ${H} L 0 ${H} Z`;
-  return { line, area };
+  const points = pts.map(([x, y]) => ({ x, y }));
+  return { line, area, points };
 }
 
 export function spark(vals: number[]) {

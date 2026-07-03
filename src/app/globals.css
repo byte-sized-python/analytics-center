@@ -113,3 +113,92 @@ body {
     font-size: 12px !important;
   }
 }
+
+/* Dashboard layout — global (not styled-jsx) so it applies consistently
+   across CommandCenter and YoutubeTab, which are separate components. */
+@keyframes slideIn {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@media (max-width: 768px) {
+  /* Mobile nav is a single row: hamburger + logo on the left, range
+     selector on the right. Tab switching and sign-out live in the
+     hamburger sidebar instead, so there's nothing left to wrap. */
+  .topbar-row {
+    gap: 8px !important;
+    padding: 10px 12px !important;
+    flex-wrap: nowrap !important;
+  }
+  .topbar-left {
+    gap: 8px !important;
+  }
+  .header-controls {
+    gap: 8px !important;
+  }
+  .topbar-divider,
+  .tab-switcher-group,
+  .user-chip {
+    display: none !important;
+  }
+  .analytics-title,
+  .user-name-text {
+    display: none !important;
+  }
+  .mobile-menu-btn {
+    display: block !important;
+  }
+  .desktop-site-selector {
+    display: none !important;
+  }
+  .mobile-sidebar {
+    animation: slideIn 0.3s ease-out !important;
+  }
+  .pill-group {
+    padding: 2px !important;
+  }
+  .pill-btn {
+    padding: 4px 8px !important;
+    font-size: 11px !important;
+  }
+  .export-csv-btn {
+    display: none !important;
+  }
+  .kpi-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+  .main-grid {
+    grid-template-columns: 1fr !important;
+  }
+  .bottom-grid {
+    grid-template-columns: 1fr !important;
+  }
+  .main-container {
+    padding: 20px 16px 48px !important;
+  }
+  .page-header {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 16px !important;
+  }
+  .chart-tooltip {
+    font-size: 11px !important;
+    padding: 6px 8px !important;
+  }
+}
+
+@media (max-width: 1024px) {
+  .kpi-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .kpi-grid {
+    grid-template-columns: 1fr !important;
+  }
+}

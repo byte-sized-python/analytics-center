@@ -4,6 +4,10 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import type { SiteMeta } from "@/lib/command-center-data";
 import { RANGE_META, type CommandCenterViewModel, type RangeKey } from "@/lib/analytics-view";
 import { worldDots } from "@/lib/world-dots";
+import YoutubeTab from "@/components/youtube-tab";
+import TrendChart from "@/components/trend-chart";
+
+type Tab = "vercel" | "youtube";
 
 const RANGE_OPTIONS: { id: RangeKey; label: string }[] = [
   { id: "24h", label: "24h" },
@@ -42,12 +46,15 @@ export default function CommandCenter({
   initialSiteId,
   initialRange,
   initialView,
+  user,
 }: {
   sites: SiteMeta[];
   initialSiteId: string;
   initialRange: RangeKey;
   initialView: CommandCenterViewModel;
+  user: { name: string; picture: string | null } | null;
 }) {
+  const [tab, setTab] = useState<Tab>("vercel");
   const [siteId, setSiteId] = useState(initialSiteId);
   const [range, setRange] = useState<RangeKey>(initialRange);
   const [vm, setVm] = useState<CommandCenterViewModel>(initialView);
@@ -90,6 +97,7 @@ export default function CommandCenter({
     <div style={{ minHeight: "100vh", background: "var(--gradient-site)", fontFamily: "var(--font-body)", color: "var(--bsp-ink)" }}>
       {/* sticky topbar */}
       <div
+        className="topbar-row"
         style={{
           position: "sticky",
           top: 0,
@@ -105,7 +113,7 @@ export default function CommandCenter({
           borderBottom: "1px solid var(--slate-200)",
         }}
       >
-        <div style={{ display: "flex", alignItems: "center", gap: 14, minWidth: 0, flex: 1 }}>
+        <div className="topbar-left" style={{ display: "flex", alignItems: "center", gap: 14, minWidth: 0, flex: 1 }}>
           <button
             onClick={() => setSidebarOpen(true)}
             className="mobile-menu-btn"
@@ -125,7 +133,39 @@ export default function CommandCenter({
           </button>
           <Logo />
           <span style={{ fontWeight: 700, fontSize: 18, letterSpacing: "-0.01em", whiteSpace: "nowrap" }} className="analytics-title">Analytics</span>
-          <span style={{ width: 1, height: 24, background: "var(--slate-200)", margin: "0 4px", flexShrink: 0 }} />
+          <span className="topbar-divider" style={{ width: 1, height: 24, background: "var(--slate-200)", margin: "0 4px", flexShrink: 0 }} />
+          <div className="pill-group tab-switcher-group" style={{ display: "inline-flex", background: "var(--slate-100)", borderRadius: 999, padding: 3, gap: 2, flexShrink: 0 }}>
+            {(
+              [
+                { id: "vercel" as const, label: "Vercel" },
+                { id: "youtube" as const, label: "YouTube" },
+              ]
+            ).map((t) => (
+              <button
+                key={t.id}
+                onClick={() => setTab(t.id)}
+                className="pill-btn"
+                style={{
+                  border: "none",
+                  cursor: "pointer",
+                  padding: "6px 14px",
+                  borderRadius: 999,
+                  fontSize: 13,
+                  fontWeight: 600,
+                  fontFamily: "var(--font-body)",
+                  background: tab === t.id ? "#fff" : "transparent",
+                  color: tab === t.id ? "var(--bsp-ink)" : "var(--slate-500)",
+                  boxShadow: tab === t.id ? "var(--shadow-sm)" : "none",
+                }}
+              >
+                {t.label}
+              </button>
+            ))}
+          </div>
+          {tab === "vercel" && (
+            <span className="topbar-divider" style={{ width: 1, height: 24, background: "var(--slate-200)", margin: "0 4px", flexShrink: 0 }} />
+          )}
+          {tab === "vercel" && (
           <div style={{ display: "flex", gap: 8, overflowX: "auto", scrollbarWidth: "none", msOverflowStyle: "none", flex: 1, minWidth: 0, paddingBottom: 2 }} className="desktop-site-selector">
             {vm.sites.map((st) => (
               <button
@@ -153,13 +193,17 @@ export default function CommandCenter({
               </button>
             ))}
           </div>
+          )}
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 12, flexShrink: 0 }} className="header-controls">
-          <div style={{ display: "inline-flex", background: "var(--slate-100)", borderRadius: 999, padding: 3, gap: 2 }}>
+          {tab === "vercel" && (
+          <>
+          <div className="pill-group" style={{ display: "inline-flex", background: "var(--slate-100)", borderRadius: 999, padding: 3, gap: 2 }}>
             {RANGE_OPTIONS.map((opt) => (
               <button
                 key={opt.id}
                 onClick={() => setRange(opt.id)}
+                className="pill-btn"
                 style={{
                   border: "none",
                   cursor: "pointer",
@@ -194,6 +238,29 @@ export default function CommandCenter({
           >
             Export CSV
           </button>
+          </>
+          )}
+          {user && (
+            <div className="user-chip" style={{ display: "flex", alignItems: "center", gap: 8, paddingLeft: 8, borderLeft: "1px solid var(--slate-200)" }}>
+              {user.picture ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={user.picture} alt="" width={26} height={26} style={{ borderRadius: 999, flexShrink: 0 }} />
+              ) : (
+                <span style={{ width: 26, height: 26, borderRadius: 999, background: "var(--bsp-blue)", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, fontWeight: 700, flexShrink: 0 }}>
+                  {user.name.charAt(0).toUpperCase()}
+                </span>
+              )}
+              <span style={{ fontSize: 12.5, color: "var(--slate-600)", fontWeight: 600, whiteSpace: "nowrap" }} className="user-name-text">
+                {user.name}
+              </span>
+              <a
+                href="/auth/logout"
+                style={{ fontSize: 12.5, fontWeight: 600, color: "var(--slate-500)", textDecoration: "none", whiteSpace: "nowrap" }}
+              >
+                Sign out
+              </a>
+            </div>
+          )}
         </div>
       </div>
 
@@ -227,7 +294,7 @@ export default function CommandCenter({
             }}
           >
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
-              <span style={{ fontWeight: 700, fontSize: 18 }}>Select Site</span>
+              <span style={{ fontWeight: 700, fontSize: 18 }}>Menu</span>
               <button
                 onClick={() => setSidebarOpen(false)}
                 style={{ border: "none", background: "transparent", cursor: "pointer", padding: 8 }}
@@ -238,145 +305,120 @@ export default function CommandCenter({
                 </svg>
               </button>
             </div>
-            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-              {vm.sites.map((st) => (
+
+            <div style={{ display: "flex", background: "var(--slate-100)", borderRadius: 999, padding: 3, gap: 2 }}>
+              {(
+                [
+                  { id: "vercel" as const, label: "Vercel" },
+                  { id: "youtube" as const, label: "YouTube" },
+                ]
+              ).map((t) => (
                 <button
-                  key={st.id}
-                  onClick={() => {
-                    setSiteId(st.id);
-                    setSidebarOpen(false);
-                  }}
+                  key={t.id}
+                  onClick={() => setTab(t.id)}
                   style={{
-                    display: "inline-flex",
-                    alignItems: "center",
-                    gap: 10,
-                    padding: "10px 14px",
-                    borderRadius: 12,
+                    flex: 1,
+                    border: "none",
                     cursor: "pointer",
+                    padding: "8px 0",
+                    borderRadius: 999,
+                    fontSize: 13.5,
+                    fontWeight: 600,
                     fontFamily: "var(--font-body)",
-                    border: st.active ? "1px solid var(--bsp-blue)" : "1px solid var(--slate-200)",
-                    background: st.active ? "var(--bsp-blue-100)" : "#fff",
-                    boxShadow: st.active ? "var(--shadow-sm)" : "none",
-                    textAlign: "left",
+                    background: tab === t.id ? "#fff" : "transparent",
+                    color: tab === t.id ? "var(--bsp-ink)" : "var(--slate-500)",
+                    boxShadow: tab === t.id ? "var(--shadow-sm)" : "none",
                   }}
                 >
-                  <span style={st.tileStyle}>{st.initials}</span>
-                  <span style={{ display: "flex", flexDirection: "column", alignItems: "flex-start", lineHeight: 1.15 }}>
-                    <span style={{ fontWeight: 600, fontSize: 14, color: "var(--bsp-ink)" }}>{st.name}</span>
-                    <span style={{ fontSize: 12, color: "var(--slate-400)" }}>{st.visitorsFmt} visitors</span>
-                  </span>
+                  {t.label}
                 </button>
               ))}
             </div>
-            <div style={{ marginTop: "auto", paddingTop: 16, borderTop: "1px solid var(--slate-200)" }}>
-              <button
-                onClick={() => {
-                  exportCsv(vm);
-                  setSidebarOpen(false);
-                }}
-                style={{
-                  width: "100%",
-                  border: "1px solid var(--slate-200)",
-                  background: "#fff",
-                  borderRadius: 10,
-                  padding: "12px 16px",
-                  fontSize: 14,
-                  fontWeight: 600,
-                  fontFamily: "var(--font-body)",
-                  cursor: "pointer",
-                  color: "var(--bsp-ink)",
-                }}
-              >
-                Export CSV
-              </button>
-            </div>
+
+            {tab === "vercel" && (
+              <>
+                <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: "0.08em", color: "var(--slate-400)" }}>SITES</div>
+                <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                  {vm.sites.map((st) => (
+                    <button
+                      key={st.id}
+                      onClick={() => {
+                        setSiteId(st.id);
+                        setSidebarOpen(false);
+                      }}
+                      style={{
+                        display: "inline-flex",
+                        alignItems: "center",
+                        gap: 10,
+                        padding: "10px 14px",
+                        borderRadius: 12,
+                        cursor: "pointer",
+                        fontFamily: "var(--font-body)",
+                        border: st.active ? "1px solid var(--bsp-blue)" : "1px solid var(--slate-200)",
+                        background: st.active ? "var(--bsp-blue-100)" : "#fff",
+                        boxShadow: st.active ? "var(--shadow-sm)" : "none",
+                        textAlign: "left",
+                      }}
+                    >
+                      <span style={st.tileStyle}>{st.initials}</span>
+                      <span style={{ display: "flex", flexDirection: "column", alignItems: "flex-start", lineHeight: 1.15 }}>
+                        <span style={{ fontWeight: 600, fontSize: 14, color: "var(--bsp-ink)" }}>{st.name}</span>
+                        <span style={{ fontSize: 12, color: "var(--slate-400)" }}>{st.visitorsFmt} visitors</span>
+                      </span>
+                    </button>
+                  ))}
+                </div>
+                <button
+                  onClick={() => {
+                    exportCsv(vm);
+                    setSidebarOpen(false);
+                  }}
+                  style={{
+                    width: "100%",
+                    border: "1px solid var(--slate-200)",
+                    background: "#fff",
+                    borderRadius: 10,
+                    padding: "12px 16px",
+                    fontSize: 14,
+                    fontWeight: 600,
+                    fontFamily: "var(--font-body)",
+                    cursor: "pointer",
+                    color: "var(--bsp-ink)",
+                  }}
+                >
+                  Export CSV
+                </button>
+              </>
+            )}
+
+            {user && (
+              <div style={{ marginTop: "auto", paddingTop: 16, borderTop: "1px solid var(--slate-200)", display: "flex", alignItems: "center", gap: 10 }}>
+                {user.picture ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={user.picture} alt="" width={32} height={32} style={{ borderRadius: 999, flexShrink: 0 }} />
+                ) : (
+                  <span style={{ width: 32, height: 32, borderRadius: 999, background: "var(--bsp-blue)", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 13, fontWeight: 700, flexShrink: 0 }}>
+                    {user.name.charAt(0).toUpperCase()}
+                  </span>
+                )}
+                <span style={{ fontSize: 13.5, color: "var(--slate-600)", fontWeight: 600, flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{user.name}</span>
+                <a href="/auth/logout" style={{ fontSize: 13, fontWeight: 600, color: "var(--slate-500)", textDecoration: "none", whiteSpace: "nowrap" }}>
+                  Sign out
+                </a>
+              </div>
+            )}
           </div>
         </>
       )}
 
-      <style jsx>{`
-        @media (max-width: 768px) {
-          div[style*="position: sticky"] {
-            gap: 8px !important;
-            padding: 10px 12px !important;
-          }
-          div[style*="display: flex"][style*="align-items: center"][style*="gap: 14"] {
-            flex-wrap: wrap !important;
-            gap: 8px !important;
-          }
-          div[style*="display: flex"][style*="align-items: center"][style*="gap: 12"][style*="flex-shrink: 0"] {
-            flex-wrap: wrap !important;
-            gap: 6px !important;
-          }
-          .header-controls {
-            gap: 6px !important;
-          }
-          .analytics-title {
-            display: none !important;
-          }
-          .mobile-menu-btn {
-            display: block !important;
-          }
-          .desktop-site-selector {
-            display: none !important;
-          }
-          .mobile-sidebar {
-            animation: slideIn 0.3s ease-out !important;
-          }
-          @keyframes slideIn {
-            from {
-              transform: translateX(-100%);
-            }
-            to {
-              transform: translateX(0);
-            }
-          }
-          div[style*="display: inline-flex"][style*="background: var(--slate-100)"] {
-            flex: 0 0 auto !important;
-            padding: 2px !important;
-          }
-          button[style*="padding: \"6px 14px\""] {
-            padding: 4px 8px !important;
-            font-size: 11px !important;
-          }
-          button[style*="padding: \"9px 16px\""] {
-            padding: 5px 8px !important;
-            font-size: 10px !important;
-            white-space: nowrap !important;
-          }
-          .export-csv-btn {
-            display: none !important;
-          }
-          .kpi-grid {
-            grid-template-columns: repeat(2, 1fr) !important;
-          }
-          .main-grid {
-            grid-template-columns: 1fr !important;
-          }
-          .bottom-grid {
-            grid-template-columns: 1fr !important;
-          }
-          .main-container {
-            padding: 20px 16px 48px !important;
-          }
-          .page-header {
-            flex-direction: column !important;
-            align-items: flex-start !important;
-            gap: 16px !important;
-          }
-        }
-        @media (max-width: 1024px) {
-          .kpi-grid {
-            grid-template-columns: repeat(2, 1fr) !important;
-          }
-        }
-        @media (max-width: 480px) {
-          .kpi-grid {
-            grid-template-columns: 1fr !important;
-          }
-        }
-      `}</style>
 
+      {tab === "youtube" && (
+        <div style={{ maxWidth: 1440, margin: "0 auto", padding: "26px 32px 72px" }} className="main-container">
+          <YoutubeTab />
+        </div>
+      )}
+
+      {tab === "vercel" && (
       <div style={{ maxWidth: 1440, margin: "0 auto", padding: "26px 32px 72px", display: "flex", flexDirection: "column", gap: 18, opacity: loading ? 0.6 : 1, transition: "opacity .15s var(--ease-smooth)" }} className="main-container">
         {/* page header */}
         <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", gap: 20, flexWrap: "wrap" }} className="page-header">
@@ -480,15 +522,17 @@ export default function CommandCenter({
                 ))}
               </div>
               <div style={{ flex: 1, minWidth: 0 }}>
-                <svg viewBox="0 0 1000 240" width="100%" height="260" preserveAspectRatio="none" style={{ display: "block" }}>
-                  {vm.trend.grid.map((g, i) => (
-                    <line key={i} x1="0" y1={g.y} x2="1000" y2={g.y} stroke="var(--slate-200)" strokeWidth="1" vectorEffect="non-scaling-stroke" />
-                  ))}
-                  <path d={vm.trend.pvArea} fill="var(--bsp-yellow-20)" />
-                  <path d={vm.trend.pvLine} fill="none" stroke="var(--bsp-yellow-2)" strokeWidth="2.5" vectorEffect="non-scaling-stroke" strokeLinejoin="round" />
-                  <path d={vm.trend.visArea} fill="var(--bsp-blue-100)" />
-                  <path d={vm.trend.visLine} fill="none" stroke="var(--bsp-blue)" strokeWidth="2.5" vectorEffect="non-scaling-stroke" strokeLinejoin="round" />
-                </svg>
+                <TrendChart
+                  viewBoxWidth={1000}
+                  viewBoxHeight={240}
+                  displayHeight={260}
+                  grid={vm.trend.grid}
+                  rows={vm.trend.rows}
+                  series={[
+                    { key: "pageviews", color: "var(--bsp-yellow-2)", areaFill: "var(--bsp-yellow-20)", line: vm.trend.pvLine, area: vm.trend.pvArea, points: vm.trend.pvPoints },
+                    { key: "visitors", color: "var(--bsp-blue)", areaFill: "var(--bsp-blue-100)", line: vm.trend.visLine, area: vm.trend.visArea, points: vm.trend.visPoints },
+                  ]}
+                />
                 <div style={{ display: "flex", justifyContent: "space-between", marginTop: 6 }}>
                   {vm.trend.xlabels.map((xl, i) => (
                     <span key={i} style={{ fontSize: 11, color: "var(--slate-400)" }}>
@@ -653,6 +697,7 @@ export default function CommandCenter({
           </div>
         </div>
       </div>
+      )}
     </div>
   );
 }

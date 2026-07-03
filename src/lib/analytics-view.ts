@@ -61,6 +61,14 @@ function fmtBucketLabel(ts: string | undefined, grain: "hour" | "day") {
   return dt.toLocaleDateString("en-US", { month: "short", day: "numeric" });
 }
 
+function fmtTooltipLabel(ts: string | undefined, grain: "hour" | "day") {
+  if (!ts) return "";
+  const dt = new Date(ts);
+  if (Number.isNaN(dt.getTime())) return "";
+  if (grain === "hour") return dt.toLocaleString("en-US", { month: "short", day: "numeric", hour: "numeric", hour12: true });
+  return dt.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" });
+}
+
 function classifyReferrer(hostname: string | undefined): "Direct" | "Search" | "Social" | "Referral" {
   if (!hostname) return "Direct";
   const h = hostname.toLowerCase();
@@ -113,8 +121,31 @@ export async function computeSiteView(sites: SiteMeta[], siteId: string, range: 
   const xlabels: string[] = [];
   for (let i = 0; i < trendRows.length; i += step) xlabels.push(fmtBucketLabel(trendRows[i]?.timestamp, rm.grain));
   if (trendRows.length) xlabels.push("Now");
-  const rows = trendRows.map((r) => ({ label: fmtBucketLabel(r.timestamp, rm.grain), pageviews: num(r, "pageviews"), visitors: num(r, "visitors") }));
-  const trend = { visLine: visPath.line, visArea: visPath.area, pvLine: pvPath.line, pvArea: pvPath.area, grid, xlabels, rows };
+  const rows = trendRows.map((r) => {
+    const label = fmtTooltipLabel(r.timestamp, rm.grain);
+    const pageviews = num(r, "pageviews");
+    const visitors = num(r, "visitors");
+    return {
+      label,
+      pageviews,
+      visitors,
+      values: [
+        { key: "visitors", text: `${fmtNum(visitors)} visitors`, color: "var(--bsp-blue)" },
+        { key: "pageviews", text: `${fmtNum(pageviews)} page views`, color: "var(--bsp-yellow-2)" },
+      ],
+    };
+  });
+  const trend = {
+    visLine: visPath.line,
+    visArea: visPath.area,
+    pvLine: pvPath.line,
+    pvArea: pvPath.area,
+    visPoints: visPath.points,
+    pvPoints: pvPath.points,
+    grid,
+    xlabels,
+    rows,
+  };
 
   // ---- KPIs ----
   const pagesPerVisit = countCurr.visitors ? countCurr.pageviews / countCurr.visitors : 0;
