@@ -1,4 +1,4 @@
-import { listProjects, VercelApiError } from "./vercel-api";
+import { listProjects, VercelApiError, type VercelProject } from "./vercel-api";
 
 export type SiteMeta = {
   id: string;
@@ -26,7 +26,32 @@ function initialsFor(name: string) {
 }
 
 export async function getSiteMetas(maxSites = 4): Promise<SiteMeta[]> {
-  const projects = await listProjects(maxSites);
+  // Vercel's GET /v9/projects defaults to most-recently-active first, so a
+  // plain limit=maxSites fetch silently drops older projects whenever
+  // *anything* (including this dashboard's own deploys) gets more active.
+  // Fetch a wider page and then apply stable selection below instead.
+  const pageSize = Math.max(maxSites, 20);
+  let projects = await listProjects(pageSize);
+
+  // Never list this dashboard's own Vercel project as a "site" — Vercel
+  // injects VERCEL_PROJECT_ID automatically at build/runtime when deployed.
+  const selfProjectId = process.env.VERCEL_PROJECT_ID;
+  if (selfProjectId) {
+    projects = projects.filter((p) => p.id !== selfProjectId);
+  }
+
+  // Optional explicit allowlist/order, e.g. TRACKED_PROJECT_NAMES=koda,koda-live,koda-studio,byte-sized-python
+  // Set this to make the site list immune to deploy-recency reshuffling entirely.
+  const tracked = process.env.TRACKED_PROJECT_NAMES?.split(",")
+    .map((s) => s.trim())
+    .filter(Boolean);
+  if (tracked?.length) {
+    const byName = new Map(projects.map((p) => [p.name, p]));
+    projects = tracked.map((name) => byName.get(name)).filter((p): p is VercelProject => Boolean(p));
+  }
+
+  projects = projects.slice(0, maxSites);
+
   return projects.map((project, i) => {
     const palette = PALETTE[i % PALETTE.length];
     const domain = project.targets?.production?.domain ?? project.latestDeployments?.[0]?.url ?? `${project.name}.vercel.app`;
